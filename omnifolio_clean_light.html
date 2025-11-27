@@ -1,0 +1,1187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Omnifolio – Tools, Not Promises.</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- SEO -->
+  <meta name="description" content="Omnifolio is a neutral, educational investment interface. Tools, not promises – a clean shell for tracking and exploring portfolios without hype or financial advice." />
+  <meta name="keywords" content="investment tool, portfolio dashboard, crypto tracker, stock tracker, finance education, no financial advice, investing without hype" />
+  <meta name="author" content="Omnifolio" />
+  <meta name="robots" content="index, follow" />
+  <meta name="theme-color" content="#f3f4f6" />
+
+  <style>
+    :root {
+      --bg: #f3f4f6;
+      --sidebar: #ffffff;
+      --card: #ffffff;
+      --accent: #2563eb; /* calm blue accent */
+      --accent-soft: rgba(37, 99, 235, 0.08);
+      --accent-strong: #1d4ed8;
+      --text: #111827;
+      --muted: #6b7280;
+      --border: #e5e7eb;
+      --danger: #b91c1c;
+      --radius-lg: 18px;
+      --shadow-main: 0 18px 35px rgba(15, 23, 42, 0.12);
+      --transition-fast: 0.18s ease-out;
+      --transition-slow: 0.3s ease;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    body {
+      min-height: 100vh;
+      background: radial-gradient(circle at top left, rgba(148, 163, 184, 0.25), transparent 55%), #f3f4f6;
+      color: var(--text);
+      display: flex;
+      justify-content: center;
+      padding: 16px;
+      transition: background var(--transition-slow);
+    }
+
+    .lite body {
+      transition: none !important;
+    }
+
+    .app-shell {
+      width: 100%;
+      max-width: 1200px;
+      margin: 0 auto;
+      border-radius: 20px;
+      border: 1px solid var(--border);
+      background: #f9fafb;
+      box-shadow: var(--shadow-main);
+      overflow: hidden;
+      display: grid;
+      grid-template-columns: 1fr;
+    }
+
+    @media (min-width: 900px) {
+      .app-shell {
+        grid-template-columns: 260px minmax(0, 1fr);
+      }
+    }
+
+    /* Sidebar */
+    .sidebar {
+      background: var(--sidebar);
+      padding: 16px 16px 18px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    @media (min-width: 900px) {
+      .sidebar {
+        border-bottom: none;
+        border-right: 1px solid var(--border);
+        padding: 20px 18px 22px;
+      }
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .brand-badge {
+      width: 40px;
+      height: 40px;
+      border-radius: 14px;
+      border: 1px solid #e5e7eb;
+      background: #111827;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #f9fafb;
+      font-weight: 800;
+      font-size: 20px;
+      box-shadow: 0 10px 25px rgba(15, 23, 42, 0.28);
+    }
+
+    .brand-text {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .brand-name {
+      font-size: 20px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      font-weight: 700;
+    }
+
+    .brand-tagline {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    .side-controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 10px;
+      margin-bottom: 14px;
+    }
+
+    .chip-control {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 11px;
+      color: var(--muted);
+      border: 1px solid var(--border);
+      background: #f9fafb;
+      cursor: pointer;
+      transition: border-color var(--transition-fast), background var(--transition-fast), color var(--transition-fast), box-shadow var(--transition-fast);
+    }
+
+    .chip-control:hover {
+      border-color: var(--accent);
+      box-shadow: 0 6px 16px rgba(15, 23, 42, 0.08);
+      color: var(--accent-strong);
+    }
+
+    .toggle-shell {
+      width: 32px;
+      height: 18px;
+      border-radius: 999px;
+      background: #e5e7eb;
+      border: 1px solid var(--border);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .toggle-knob {
+      width: 12px;
+      height: 12px;
+      border-radius: 999px;
+      background: #9ca3af;
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      transition: transform var(--transition-fast), background var(--transition-fast);
+    }
+
+    .chip-control.active .toggle-knob {
+      transform: translateX(12px);
+      background: var(--accent);
+    }
+
+    .nav {
+      display: flex;
+      flex-direction: row;
+      gap: 8px;
+      overflow-x: auto;
+      padding-top: 4px;
+    }
+
+    @media (min-width: 900px) {
+      .nav {
+        flex-direction: column;
+        padding-top: 10px;
+      }
+    }
+
+    .nav-button {
+      flex: 1;
+      min-width: 96px;
+      text-align: center;
+      padding: 7px 10px;
+      font-size: 12px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: #f9fafb;
+      color: var(--muted);
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast), transform var(--transition-fast), box-shadow var(--transition-fast);
+    }
+
+    .nav-button.active {
+      background: var(--accent-soft);
+      border-color: var(--accent);
+      color: var(--accent-strong);
+      transform: translateY(-1px);
+      box-shadow: 0 10px 20px rgba(15, 23, 42, 0.12);
+    }
+
+    @media (min-width: 900px) {
+      .nav-button {
+        flex: none;
+        text-align: left;
+      }
+    }
+
+    .sidebar-footer {
+      margin-top: 14px;
+      font-size: 10px;
+      color: var(--muted);
+    }
+
+    /* Main */
+    .main {
+      padding: 16px 14px 18px;
+      background: linear-gradient(to bottom right, #f9fafb, #eef2ff);
+    }
+
+    @media (min-width: 900px) {
+      .main {
+        padding: 20px 22px 22px;
+      }
+    }
+
+    .panel {
+      display: none;
+      animation: fadeInUp 0.22s var(--transition-fast);
+    }
+
+    .panel.active {
+      display: block;
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(3px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .lite .panel {
+      animation: none !important;
+    }
+
+    .card {
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border);
+      background: var(--card);
+      box-shadow: 0 12px 30px rgba(15, 23, 42, 0.10);
+      padding: 16px 14px 14px;
+    }
+
+    @media (min-width: 900px) {
+      .card {
+        padding: 18px 18px 16px;
+      }
+    }
+
+    .card + .card {
+      margin-top: 12px;
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 6px;
+    }
+
+    .card-title {
+      font-size: 16px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .card-title span.icon {
+      font-size: 18px;
+    }
+
+    .card-tag {
+      font-size: 10px;
+      border-radius: 999px;
+      padding: 3px 8px;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      background: #f9fafb;
+      white-space: nowrap;
+    }
+
+    .card-body {
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.5;
+      margin-top: 4px;
+    }
+
+    .card-body p + p {
+      margin-top: 6px;
+    }
+
+    .pill-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 8px;
+    }
+
+    .pill {
+      font-size: 11px;
+      border-radius: 999px;
+      padding: 4px 9px;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      background: #f9fafb;
+    }
+
+    .section-subtitle {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 8px;
+      margin-bottom: 6px;
+      font-weight: 500;
+    }
+
+    .badge {
+      font-size: 10px;
+      padding: 2px 6px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--muted);
+      background: #f9fafb;
+    }
+
+    .legal-list {
+      margin-top: 6px;
+      font-size: 12px;
+      color: var(--muted);
+      padding-left: 14px;
+    }
+
+    .legal-list li + li {
+      margin-top: 4px;
+    }
+
+    .footer {
+      margin-top: 10px;
+      text-align: center;
+      font-size: 10px;
+      color: var(--muted);
+    }
+
+    /* Table */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 11px;
+      margin-top: 6px;
+      background: #ffffff;
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    th, td {
+      padding: 6px 6px;
+      border-bottom: 1px solid #e5e7eb;
+      text-align: left;
+    }
+
+    th {
+      color: #6b7280;
+      text-transform: uppercase;
+      font-size: 10px;
+      letter-spacing: 0.06em;
+      background: #f9fafb;
+    }
+
+    tbody tr:nth-child(even) {
+      background: #f9fafb;
+    }
+
+    .summary-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .summary-pill {
+      flex: 1;
+      min-width: 130px;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      padding: 7px 10px;
+      font-size: 11px;
+      color: var(--muted);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #ffffff;
+    }
+
+    .summary-label {
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      font-size: 10px;
+    }
+
+    .summary-value {
+      font-weight: 600;
+      color: var(--accent-strong);
+      font-size: 12px;
+    }
+
+    .input-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px 10px;
+      margin-top: 10px;
+      margin-bottom: 8px;
+    }
+
+    @media (max-width: 600px) {
+      .input-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    .field label {
+      font-size: 11px;
+    }
+
+    .field input,
+    .field select,
+    .field textarea {
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: #f9fafb;
+      color: var(--text);
+      padding: 6px 9px;
+      font-size: 12px;
+      outline: none;
+      transition: border-color var(--transition-fast), box-shadow var(--transition-fast), background var(--transition-fast);
+    }
+
+    .field textarea {
+      min-height: 52px;
+      resize: vertical;
+    }
+
+    .field input:focus,
+    .field select:focus,
+    .field textarea:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 1px rgba(37, 99, 235, 0.18);
+      background: #ffffff;
+    }
+
+    .actions-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .btn {
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: #ffffff;
+      color: var(--text);
+      font-size: 12px;
+      padding: 7px 14px;
+      cursor: pointer;
+      transition: background var(--transition-fast), border-color var(--transition-fast), transform var(--transition-fast), box-shadow var(--transition-fast);
+    }
+
+    .btn.primary {
+      background: linear-gradient(135deg, #2563eb, #1d4ed8);
+      border-color: #2563eb;
+      color: #f9fafb;
+    }
+
+    .btn.danger {
+      border-color: rgba(185, 28, 28, 0.8);
+      color: #991b1b;
+      background: #fef2f2;
+    }
+
+    .btn:hover {
+      border-color: var(--accent);
+      box-shadow: 0 8px 18px rgba(15, 23, 42, 0.12);
+      transform: translateY(-1px);
+    }
+
+    .btn.primary:hover {
+      filter: brightness(1.03);
+    }
+
+    .btn.danger:hover {
+      border-color: #b91c1c;
+      background: #fee2e2;
+      color: #7f1d1d;
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      padding: 2px 7px;
+      font-size: 10px;
+      color: var(--muted);
+      background: #f9fafb;
+    }
+
+    .tag.core { border-color: rgba(34, 197, 94, 0.6); color: #166534; }
+    .tag.satellite { border-color: rgba(37, 99, 235, 0.6); color: #1d4ed8; }
+    .tag.moonshot { border-color: rgba(248, 113, 113, 0.8); color: #b91c1c; }
+
+    .chip-delete {
+      border-radius: 999px;
+      border: 1px solid rgba(185, 28, 28, 0.6);
+      background: transparent;
+      color: #b91c1c;
+      font-size: 11px;
+      padding: 3px 8px;
+      cursor: pointer;
+      transition: background var(--transition-fast), border-color var(--transition-fast), transform var(--transition-fast);
+    }
+
+    .chip-delete:hover {
+      background: #fee2e2;
+      border-color: #b91c1c;
+      transform: translateY(-0.5px);
+    }
+
+    /* Cookie / local storage banner */
+    .cookie-banner {
+      position: fixed;
+      left: 50%;
+      bottom: 12px;
+      transform: translateX(-50%);
+      max-width: 480px;
+      width: calc(100% - 32px);
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 8px 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 11px;
+      color: var(--muted);
+      box-shadow: 0 18px 40px rgba(15, 23, 42, 0.18);
+      z-index: 40;
+    }
+
+    .cookie-banner-text {
+      flex: 1;
+    }
+
+    .cookie-banner-actions {
+      display: flex;
+      gap: 6px;
+      flex-wrap: nowrap;
+    }
+
+    .btn-small {
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: #f9fafb;
+      color: var(--text);
+      font-size: 11px;
+      padding: 5px 9px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast), box-shadow var(--transition-fast);
+    }
+
+    .btn-small.primary {
+      background: linear-gradient(135deg, #2563eb, #1d4ed8);
+      border-color: #2563eb;
+      color: #f9fafb;
+    }
+
+    .btn-small:hover {
+      border-color: var(--accent);
+      box-shadow: 0 8px 18px rgba(15, 23, 42, 0.12);
+      color: var(--accent-strong);
+    }
+
+    .btn-small.primary:hover {
+      filter: brightness(1.03);
+    }
+
+    .cookie-hidden {
+      display: none !important;
+    }
+
+    .lite .app-shell {
+      box-shadow: 0 8px 18px rgba(15, 23, 42, 0.16);
+    }
+    .lite * {
+      transition: none !important;
+      animation: none !important;
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-badge">Ω</div>
+        <div class="brand-text">
+          <div class="brand-name">OMNIFOLIO</div>
+          <div class="brand-tagline">Tools, Not Promises.</div>
+        </div>
+      </div>
+
+      <div class="side-controls">
+        <button class="chip-control" id="liteToggle">
+          <span>Lite mode</span>
+          <div class="toggle-shell">
+            <div class="toggle-knob"></div>
+          </div>
+        </button>
+      </div>
+
+      <nav class="nav">
+        <button class="nav-button active" data-panel="home">🏠 Overview</button>
+        <button class="nav-button" data-panel="portfolio">📂 Portfolio</button>
+        <button class="nav-button" data-panel="allocator">🧮 Allocator</button>
+        <button class="nav-button" data-panel="news">📰 News</button>
+        <button class="nav-button" data-panel="legal">⚖ Rules &amp; Legal</button>
+      </nav>
+
+      <div class="sidebar-footer">
+        Neutral, educational front-end for investment ideas.  
+        No financial advice. No tracking. Just structure.
+      </div>
+    </aside>
+
+    <!-- MAIN -->
+    <main class="main">
+      <!-- HOME -->
+      <section class="panel active" data-panel="home">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">
+              <span class="icon">📊</span>
+              <span>Welcome to Omnifolio</span>
+            </div>
+            <span class="card-tag">Clean layout · Light mode</span>
+          </div>
+          <div class="card-body">
+            <p>
+              This is a clean, light version of <strong>Omnifolio</strong> – a neutral interface for exploring investment ideas without predictions or hype.
+              The focus is on readability, simplicity and professionalism.
+            </p>
+            <p class="section-subtitle">
+              Core ideas behind Omnifolio:
+            </p>
+            <div class="pill-row">
+              <span class="pill">🧱 Tools, not promises – structure instead of calls.</span>
+              <span class="pill">🪙 Multi-asset friendly – crypto, stocks, metals, cash.</span>
+              <span class="pill">📰 Fact-first – link out to reputable sources.</span>
+              <span class="pill">🔒 Local-first – data lives in your browser.</span>
+              <span class="pill">🤖 AI optional – powered by your key, not ours.</span>
+            </div>
+          </div>
+        </div>
+        <div class="footer">
+          Omnifolio • A neutral layer for thinking about investments. Not a broker, not an advisor.
+        </div>
+      </section>
+
+      <!-- PORTFOLIO (interactive) -->
+      <section class="panel" data-panel="portfolio">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">
+              <span class="icon">📂</span>
+              <span>Portfolio tracker (local only)</span>
+            </div>
+            <span class="card-tag">v0.1 – manual values</span>
+          </div>
+          <div class="card-body">
+            <p>
+              This is a simple, manual portfolio tracker. It does <strong>not</strong> fetch live prices. You set the current value of each position,
+              and Omnifolio calculates totals and allocation. Everything is stored locally in this browser.
+            </p>
+
+            <div class="summary-row">
+              <div class="summary-pill">
+                <div class="summary-label">Total value</div>
+                <div class="summary-value" id="pfTotal">€0</div>
+              </div>
+              <div class="summary-pill">
+                <div class="summary-label">Positions</div>
+                <div class="summary-value" id="pfPositions">0</div>
+              </div>
+              <div class="summary-pill">
+                <div class="summary-label">Core vs moonshot</div>
+                <div class="summary-value" id="pfCoreMoon">0 / 0</div>
+              </div>
+            </div>
+
+            <p class="section-subtitle">
+              Add or update a position
+            </p>
+
+            <form id="pfForm">
+              <div class="input-grid">
+                <div class="field">
+                  <label for="pfName">Asset name</label>
+                  <input id="pfName" type="text" placeholder="e.g. BTC, S&P 500 ETF, Gold" autocomplete="off" />
+                </div>
+                <div class="field">
+                  <label for="pfType">Type</label>
+                  <select id="pfType">
+                    <option value="Crypto">Crypto</option>
+                    <option value="Stock / ETF">Stock / ETF</option>
+                    <option value="Metal">Metal</option>
+                    <option value="Cash / Stable">Cash / Stable</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label for="pfBucket">Bucket</label>
+                  <select id="pfBucket">
+                    <option value="core">Core</option>
+                    <option value="satellite">Satellite</option>
+                    <option value="moonshot">Moonshot</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label for="pfValue">Current value (€)</label>
+                  <input id="pfValue" type="number" step="0.01" min="0" placeholder="e.g. 2500" />
+                </div>
+              </div>
+              <div class="field">
+                <label for="pfNotes">Notes (optional)</label>
+                <textarea id="pfNotes" placeholder="Exchange, wallet, strategy notes…"></textarea>
+              </div>
+              <div class="actions-row">
+                <button type="submit" class="btn primary">Save position</button>
+                <button type="button" class="btn danger" id="pfClear">Clear all data</button>
+              </div>
+            </form>
+
+            <p class="section-subtitle">
+              Your positions
+            </p>
+            <table>
+              <thead>
+                <tr>
+                  <th>Asset</th>
+                  <th>Type</th>
+                  <th>Bucket</th>
+                  <th>Value (€)</th>
+                  <th>Share</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="pfTableBody">
+                <tr>
+                  <td colspan="6" style="padding:8px 6px; font-size:11px; color:#6b7280;">
+                    No positions yet. Add something above – all data stays in this browser.
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ALLOCATOR (placeholder shell) -->
+      <section class="panel" data-panel="allocator">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">
+              <span class="icon">🧮</span>
+              <span>Allocator concept</span>
+            </div>
+            <span class="card-tag">Placeholder</span>
+          </div>
+          <div class="card-body">
+            <p>
+              In a future version this area becomes your “what if?” engine: you type a monthly budget, risk level and asset preferences,
+              and Omnifolio suggests high-level buckets – not individual coins or stocks.
+            </p>
+            <p class="section-subtitle">
+              Example inputs you might add later:
+            </p>
+            <ul class="legal-list">
+              <li>• Monthly budget (€).</li>
+              <li>• Time horizon (years).</li>
+              <li>• Risk profile: defensive / balanced / aggressive.</li>
+              <li>• Whether to include crypto, metals, commodities, etc.</li>
+              <li>• Max percentage in “moonshot” positions.</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- NEWS (placeholder shell) -->
+      <section class="panel" data-panel="news">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">
+              <span class="icon">📰</span>
+              <span>News hub concept</span>
+            </div>
+            <span class="card-tag">Links only</span>
+          </div>
+          <div class="card-body">
+            <p>
+              Omnifolio is not a news publisher. The idea for this panel is to group links to established outlets so users can quickly jump out,
+              verify information and then come back to their tools.
+            </p>
+            <p class="section-subtitle">
+              Example links you might add manually:
+            </p>
+            <ul class="legal-list">
+              <li>• Crypto – CoinDesk, CoinTelegraph, exchange news pages.</li>
+              <li>• Stocks – MarketWatch, Yahoo Finance, Reuters Markets.</li>
+              <li>• Metals &amp; commodities – Kitco, OilPrice, Investing.com.</li>
+              <li>• Macro – ECB, Federal Reserve, BIS and similar.</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- LEGAL -->
+      <section class="panel" data-panel="legal">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">
+              <span class="icon">⚖</span>
+              <span>Rules, legal &amp; privacy</span>
+            </div>
+            <span class="card-tag">Education only</span>
+          </div>
+          <div class="card-body">
+            <span class="badge">How to use Omnifolio</span>
+            <p class="section-subtitle">
+              Omnifolio is meant to help you think, not tell you what to do.
+            </p>
+            <ul class="legal-list">
+              <li>• Use it to organise ideas across crypto, stocks, metals and cash.</li>
+              <li>• Double-check everything with multiple independent sources.</li>
+              <li>• Treat every chart and number as a scenario, not a promise.</li>
+              <li>• Talk to a qualified professional for real financial advice.</li>
+            </ul>
+
+            <p class="section-subtitle" style="margin-top:10px;">
+              Legal notice
+            </p>
+            <ul class="legal-list">
+              <li>• Omnifolio does <strong>not</strong> provide financial, legal or tax advice.</li>
+              <li>• Nothing in this interface is a recommendation to buy, sell or hold any asset.</li>
+              <li>• Markets are volatile; you can lose all the money you invest.</li>
+              <li>• You are fully responsible for every decision you make.</li>
+            </ul>
+
+            <p class="section-subtitle" style="margin-top:10px;">
+              Privacy &amp; local storage
+            </p>
+            <ul class="legal-list">
+              <li>• This prototype does not send data to any external server.</li>
+              <li>• Portfolio entries and settings are stored locally in your browser (localStorage) where possible.</li>
+              <li>• No tracking, no analytics, no third-party cookies are built into this concept.</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Cookie / local storage style notice (prototype) -->
+  <div class="cookie-banner" id="cookieBanner">
+    <div class="cookie-banner-text">
+      Omnifolio stores settings and portfolio data locally on your device so the interface remembers your choices. Nothing is sent to a server.
+    </div>
+    <div class="cookie-banner-actions">
+      <button class="btn-small" id="cookieMore">More info</button>
+      <button class="btn-small primary" id="cookieOk">OK</button>
+    </div>
+  </div>
+
+  <script>
+    (function() {
+      const navButtons = Array.from(document.querySelectorAll(".nav-button"));
+      const panels = Array.from(document.querySelectorAll(".panel"));
+      const liteToggle = document.getElementById("liteToggle");
+      const cookieBanner = document.getElementById("cookieBanner");
+      const cookieOk = document.getElementById("cookieOk");
+      const cookieMore = document.getElementById("cookieMore");
+
+      function setPanel(id) {
+        panels.forEach(p => {
+          p.classList.toggle("active", p.dataset.panel === id);
+        });
+        navButtons.forEach(btn => {
+          btn.classList.toggle("active", btn.dataset.panel === id);
+        });
+      }
+
+      navButtons.forEach(btn => {
+        btn.addEventListener("click", () => {
+          setPanel(btn.dataset.panel);
+        });
+      });
+
+      // Lite mode (turns off animations/transitions)
+      function applyLiteMode(on) {
+        if (on) {
+          document.documentElement.classList.add("lite");
+          liteToggle.classList.add("active");
+        } else {
+          document.documentElement.classList.remove("lite");
+          liteToggle.classList.remove("active");
+        }
+        try {
+          localStorage.setItem("omnifolio_lite", on ? "1" : "0");
+        } catch (e) {}
+      }
+
+      liteToggle.addEventListener("click", () => {
+        const on = !document.documentElement.classList.contains("lite");
+        applyLiteMode(on);
+      });
+
+      // Initial lite mode from localStorage
+      try {
+        const v = localStorage.getItem("omnifolio_lite");
+        if (v === "1") applyLiteMode(true);
+      } catch (e) {}
+
+      // Cookie / local storage banner
+      const COOKIE_KEY = "omnifolio_cookie_ack";
+      function hideCookieBanner() {
+        cookieBanner.classList.add("cookie-hidden");
+      }
+      try {
+        if (localStorage.getItem(COOKIE_KEY) === "1") {
+          hideCookieBanner();
+        }
+      } catch (e) {}
+
+      if (cookieOk) {
+        cookieOk.addEventListener("click", function() {
+          hideCookieBanner();
+          try { localStorage.setItem(COOKIE_KEY, "1"); } catch (e) {}
+        });
+      }
+
+      if (cookieMore) {
+        cookieMore.addEventListener("click", function() {
+          setPanel("legal");
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        });
+      }
+
+      /* Portfolio logic */
+      const PF_KEY = "omnifolio_portfolio_v1";
+      let portfolio = [];
+
+      const pfForm = document.getElementById("pfForm");
+      const pfName = document.getElementById("pfName");
+      const pfType = document.getElementById("pfType");
+      const pfBucket = document.getElementById("pfBucket");
+      const pfValue = document.getElementById("pfValue");
+      const pfNotes = document.getElementById("pfNotes");
+      const pfClear = document.getElementById("pfClear");
+
+      const pfTableBody = document.getElementById("pfTableBody");
+      const pfTotalEl = document.getElementById("pfTotal");
+      const pfPosEl = document.getElementById("pfPositions");
+      const pfCoreMoonEl = document.getElementById("pfCoreMoon");
+
+      function formatMoney(n) {
+        if (!isFinite(n)) return "€0";
+        return "€" + n.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+      }
+
+      function loadPortfolio() {
+        try {
+          const raw = localStorage.getItem(PF_KEY);
+          if (!raw) return;
+          const parsed = JSON.parse(raw);
+          if (Array.isArray(parsed)) {
+            portfolio = parsed;
+          }
+        } catch (e) {
+          console.warn("Failed to load portfolio", e);
+        }
+      }
+
+      function savePortfolio() {
+        try {
+          localStorage.setItem(PF_KEY, JSON.stringify(portfolio));
+        } catch (e) {
+          console.warn("Failed to save portfolio", e);
+        }
+      }
+
+      function renderPortfolio() {
+        if (!pfTableBody) return;
+        pfTableBody.innerHTML = "";
+
+        if (!portfolio.length) {
+          const row = document.createElement("tr");
+          const cell = document.createElement("td");
+          cell.colSpan = 6;
+          cell.style.padding = "8px 6px";
+          cell.style.fontSize = "11px";
+          cell.style.color = "#6b7280";
+          cell.textContent = "No positions yet. Add something above – all data stays in this browser.";
+          row.appendChild(cell);
+          pfTableBody.appendChild(row);
+
+          pfTotalEl.textContent = "€0";
+          pfPosEl.textContent = "0";
+          pfCoreMoonEl.textContent = "0 / 0";
+          return;
+        }
+
+        const total = portfolio.reduce((sum, p) => sum + (p.value || 0), 0);
+        let coreCount = 0;
+        let moonCount = 0;
+
+        portfolio.forEach(pos => {
+          if (pos.bucket === "core") coreCount++;
+          if (pos.bucket === "moonshot") moonCount++;
+        });
+
+        portfolio.forEach(pos => {
+          const tr = document.createElement("tr");
+
+          const tdName = document.createElement("td");
+          tdName.textContent = pos.name || "-";
+
+          const tdType = document.createElement("td");
+          tdType.textContent = pos.type || "-";
+
+          const tdBucket = document.createElement("td");
+          const tag = document.createElement("span");
+          tag.className = "tag " + (pos.bucket || "core");
+          let label = "Core";
+          if (pos.bucket === "satellite") label = "Satellite";
+          if (pos.bucket === "moonshot") label = "Moonshot";
+          tag.textContent = label;
+          tdBucket.appendChild(tag);
+
+          const tdValue = document.createElement("td");
+          tdValue.textContent = formatMoney(pos.value || 0);
+
+          const tdShare = document.createElement("td");
+          const share = total > 0 ? ((pos.value || 0) / total) * 100 : 0;
+          tdShare.textContent = share.toFixed(1) + "%";
+
+          const tdActions = document.createElement("td");
+          tdActions.style.textAlign = "right";
+          const delBtn = document.createElement("button");
+          delBtn.textContent = "Remove";
+          delBtn.className = "chip-delete";
+          delBtn.addEventListener("click", () => {
+            portfolio = portfolio.filter(p => p.id !== pos.id);
+            savePortfolio();
+            renderPortfolio();
+          });
+          tdActions.appendChild(delBtn);
+
+          tr.appendChild(tdName);
+          tr.appendChild(tdType);
+          tr.appendChild(tdBucket);
+          tr.appendChild(tdValue);
+          tr.appendChild(tdShare);
+          tr.appendChild(tdActions);
+
+          pfTableBody.appendChild(tr);
+        });
+
+        pfTotalEl.textContent = formatMoney(total);
+        pfPosEl.textContent = String(portfolio.length);
+        pfCoreMoonEl.textContent = coreCount + " / " + moonCount;
+      }
+
+      if (pfForm) {
+        pfForm.addEventListener("submit", function(e) {
+          e.preventDefault();
+          const name = (pfName.value || "").trim();
+          const type = pfType.value || "Other";
+          const bucket = pfBucket.value || "core";
+          const value = parseFloat(String(pfValue.value).replace(",", ".")) || 0;
+          const notes = (pfNotes.value || "").trim();
+
+          if (!name || value <= 0) {
+            alert("Please enter at least a name and a value greater than 0.");
+            return;
+          }
+
+          const existing = portfolio.find(p =>
+            p.name.toLowerCase() === name.toLowerCase() && p.type === type
+          );
+
+          if (existing) {
+            existing.value = value;
+            existing.bucket = bucket;
+            existing.notes = notes;
+          } else {
+            portfolio.push({
+              id: Date.now() + Math.random(),
+              name,
+              type,
+              bucket,
+              value,
+              notes
+            });
+          }
+
+          savePortfolio();
+          renderPortfolio();
+
+          pfName.value = "";
+          pfValue.value = "";
+          pfNotes.value = "";
+        });
+      }
+
+      if (pfClear) {
+        pfClear.addEventListener("click", function() {
+          if (!confirm("This will remove all positions stored in this browser. Continue?")) return;
+          portfolio = [];
+          savePortfolio();
+          renderPortfolio();
+        });
+      }
+
+      // Initialise portfolio
+      loadPortfolio();
+      renderPortfolio();
+    })();
+  </script>
+</body>
+</html>
